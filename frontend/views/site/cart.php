@@ -1,9 +1,11 @@
 <?php
 $this->title = 'My Cart';
-$this->params['breadcrumbs'][] = $this->title;
+
 ?>
 <div class="site-cart">
 <div class="container">
+<div class="row">
+        <div class="col-md-12">
     <h1>Shopping Cart</h1>
     <?php if (empty($cartItems)) : ?>
         <p>Your cart is empty.</p>
@@ -25,6 +27,8 @@ $this->params['breadcrumbs'][] = $this->title;
             </tbody>
         </table>
     <?php endif; ?>
+        </div>
+</div>
 </div>
 </div>
 
