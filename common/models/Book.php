@@ -104,7 +104,7 @@ class Book extends \yii\db\ActiveRecord
     
         try {
             $ok = parent::save($runValidation, $attributeNames);
-    
+        
             if ($ok && $this->bookImage && $this->bookFile) {
                 $imageFullpath = Yii::getAlias('@frontend/web/storage') . $this->book_image;
                 $bookFilefullpath = Yii::getAlias('@frontend/web/storage') . $this->book_file;
@@ -120,7 +120,7 @@ class Book extends \yii\db\ActiveRecord
             } else {
             }
         } catch (\Exception $e) {
-            $transaction->rollBack();
+            // $transaction->rollBack();
             throw $e;
         }
     

@@ -78,9 +78,9 @@ class SiteController extends Controller
     public function actionIndex()
     {
         $dataProvider=new ActiveDataProvider([
-            'query'=>Book::find()->all()
+            'query'=>Book::findBySql("select * from book order by book_isbn limit 3")
         ]);
-        return $this->render('index',$dataProvider);
+        return $this->render('index',['dataProvider' => $dataProvider]);
     }
 
     /**
@@ -120,7 +120,10 @@ class SiteController extends Controller
 
     public function actionBooks()
     {
-        return $this->render('books');
+        $dataProvider=new ActiveDataProvider([
+            'query'=>Book::findBySql("select * from book order by book_isbn limit 3")
+        ]);
+        return $this->render('books',['dataProvider'=>$dataProvider]);
     }
 
     public function actionCart()

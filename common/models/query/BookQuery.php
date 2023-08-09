@@ -31,4 +31,7 @@ class BookQuery extends \yii\db\ActiveQuery
     {
         return parent::one($db);
     }
+    public function latest(){
+        return parent::addOrderBy('book_isbn');
+    }
 }
