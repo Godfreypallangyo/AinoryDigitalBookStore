@@ -121,15 +121,20 @@ class SiteController extends Controller
     public function actionBooks()
     {
         $dataProvider=new ActiveDataProvider([
-            'query'=>Book::findBySql("select * from book order by book_isbn limit 3")
+            'query'=>Book::findBySql("select * from book")
         ]);
         return $this->render('books',['dataProvider'=>$dataProvider]);
     }
 
     public function actionCart()
     {
-        return $this->render('cart');
+        $cartItems = Yii::$app->session->get('cartItems', []);
+    
+        return $this->render('cart', [
+            'cartItems' => $cartItems,
+        ]);
     }
+    
     /**
      * Displays contact page.
      *
@@ -152,6 +157,35 @@ class SiteController extends Controller
             'model' => $model,
         ]);
     }
+    public function actionAddToCart($book_isbn)
+    {
+        $book = Book::findOne(['book_isbn' => $book_isbn]);
+        
+        if ($book) {
+            $cartItems = Yii::$app->session->get('cartItems', []);
+            $cartItems[] = $book;
+            Yii::$app->session->set('cartItems', $cartItems);
+        }
+        
+        return $this->redirect(Yii::$app->request->referrer ?: ['index']); // Redirect to previous page
+    }
+    public function actionRemoveItem($book_isbn)
+    {
+        if (Yii::$app->session->has('cart')) {
+            $cart = Yii::$app->session->get('cart');
+
+            // Find the item in the cart and remove it
+            $updatedCart = array_filter($cart, function ($item) use ($book_isbn) {
+                return $item['book_isbn'] !== $book_isbn;
+            });
+
+            // Save the updated cart to the session
+            Yii::$app->session->set('cart', $updatedCart);
+        }
+
+        return $this->redirect(['site/cart']);
+    }
+    
 
     /**
      * Displays about page.

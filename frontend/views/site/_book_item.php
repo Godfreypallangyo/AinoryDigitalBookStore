@@ -9,6 +9,8 @@ use yii\helpers\FileHelper;
 use yii\helpers\StringHelper;
 use yii\helpers\VarDumper;
 use yii\web\UploadedFile;
+use yii\helpers\Url;
+use yii\helpers\Html;
 
 $book_no=0;
 ?>
@@ -28,8 +30,8 @@ $book_no=0;
                                 </div>
                                 <p>
                                     <a href="#" class="btn btn-black btn-outline-black rounded-0 d-block mb-2 mb-lg-0 d-lg-inline-block">View Details</a>
-                                    <a href="#" class="btn btn-black rounded-0 d-block d-lg-inline-block">Add To Cart</a>
-                                </p>
+                                    <?= Html::a('Add to Cart', ['site/add-to-cart', 'book_isbn' => $model->book_isbn], ['class' => 'btn btn-black mr-1 rounded-0']) ?>
+                                    </p>
                             </div>
                         </div>
                     </div>

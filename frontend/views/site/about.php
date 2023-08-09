@@ -10,11 +10,11 @@ $this->title = 'About';
 <div class="site-about">
     <div class="row">
         <div class="bio" style="max-width: 90%;font-size: 18px;">
-            <!-- <div class="site-blocks-cover overlay" style="margin-top: 20px;" data-aos="fade" data-stellar-background-ratio="0.5"> -->
-                <div class="container">
+            <!-- <div class="site-blocks-cover overlay" style="margin-top: 20px;" data-aos="fade" data-stellar-background-ratio="1"> -->
+                <div class="container" style="margin-top: 80px;">
                     <div class="row align-items-center justify-content-center">
                         <div class="col-md-12" data-aos="fade-up" data-aos-delay="400">
-                            <p>
+                        <p>
                                 <strong>Ainory Peter Gesase</strong>
                                 is the author of the four books that focuses on spiritual issues key to people salvation. He failed to raise funds to get the books published and and to access self-publishing printing companies. After two years of consultation on publishing the first book titled “What I saw in the Bible” there was no promising results to get the book published. In view of that I decided to open the Website where the four books can be accessed by people who are in need of salvation. I believe that the world does not get access to blessing that God put in many people because of lack of funds and the opportunity to publish their work.
                                 God uses people at a given time to know about His secrets that are embedded in Bible verses but are prevented by Satan from being known to the world.
