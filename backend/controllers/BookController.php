@@ -7,7 +7,6 @@ use backend\models\search\BookSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
-use yii\web\UploadedFile;
 
 /**
  * BookController implements the CRUD actions for Book model.
@@ -69,13 +68,7 @@ class BookController extends Controller
     public function actionCreate()
     {
         $model = new Book();
-        $model->bookImage=UploadedFile::getInstance($model,'bookImage');
-        $model->bookFile=UploadedFile::getInstance($model,'bookFile');
 
-        // echo '<pre>';
-        // var_dump($_FILES);
-        // echo '</pre>';
-        // exit;
         if ($this->request->isPost) {
             if ($model->load($this->request->post()) && $model->save()) {
                 return $this->redirect(['view', 'book_isbn' => $model->book_isbn]);
@@ -99,20 +92,15 @@ class BookController extends Controller
     public function actionUpdate($book_isbn)
     {
         $model = $this->findModel($book_isbn);
-    
-        if ($this->request->isPost) {
-            var_dump($model->attributes); // Debug: check if model attributes are being populated
-            var_dump($this->request->post()); // Debug: check if POST data is being received
-            if ($model->load($this->request->post()) && $model->save()) {
-                return $this->redirect(['view', 'book_isbn' => $model->book_isbn]);
-            }
+
+        if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
+            return $this->redirect(['view', 'book_isbn' => $model->book_isbn]);
         }
-    
+
         return $this->render('update', [
             'model' => $model,
         ]);
     }
-    
 
     /**
      * Deletes an existing Book model.

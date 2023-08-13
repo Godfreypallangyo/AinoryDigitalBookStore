@@ -2,6 +2,8 @@
 use yii\helpers\Html;
 
 $this->title = 'My Cart';
+use yii\helpers\Url;
+
 ?>
 
 <div class="site-cart">
@@ -15,7 +17,7 @@ $this->title = 'My Cart';
                     <table class="table table-bordered">
                         <thead>
                             <tr>
-                                <th>Item Picture</th>
+                                <th>Book Title</th>
                                 <th>Price</th>
                                 <th>Actions</th>
                             </tr>
@@ -37,13 +39,13 @@ $this->title = 'My Cart';
                             <p>Total Items: <?= count($cartItems); ?></p>
                         </div>
                         <div class="col-md-6">
-                            <p>Total Price: <?= array_reduce($cartItems, function ($carry, $item) {
+                            <p>Total Price: <?=Yii::$app->formatter->currencyCode . array_reduce($cartItems, function ($carry, $item) {
                                 return $carry + $item->book_price;
                             }, 0); ?></p>
                         </div>
                     </div>
                     <div class="text-center">
-                        <?= Html::a('Checkout', ['site/checkout'], ['class' => 'btn btn-primary']) ?>
+                    <?= Html::a('Checkout', Url::to(['site/checkout']), ['class' => 'btn btn-primary']) ?>
                     </div>
                 <?php endif; ?>
             </div>

@@ -65,6 +65,19 @@ class SiteController extends Controller
         return $this->render('index');
     }
 
+        /**
+     * Displays a single OrderedBook model.
+     * @param int $id ID
+     * @return string
+     * @throws NotFoundHttpException if the model cannot be found
+     */
+    public function actionView($id)
+    {
+        return $this->render('view', [
+            'model' => $this->findModel($id),
+        ]);
+    }
+    
     /**
      * Login action.
      *

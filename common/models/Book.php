@@ -4,9 +4,6 @@ namespace common\models;
 
 use Yii;
 use yii\helpers\FileHelper;
-use yii\helpers\VarDumper;
-use yii\web\UploadedFile;
-
 /**
  * This is the model class for table "book".
  *

@@ -4,6 +4,8 @@
 
 use yii\data\ActiveDataProvider;
 use yii\widgets\ListView;
+use yii\helpers\Html;
+use yii\helpers\Url;
 
 /**
  * @var yii\data\ActiveDataProvider $dataProvider
@@ -22,10 +24,14 @@ $this->title = 'Ainory Digital Book Store';
                             <div class="row mb-4">
                                 <div class="col-md-7">
                                     <h1>Ainory Peter Gesase</h1>
-                                    <p class="mb-5 lead">Lorem ipsum dolor sit amet consectetur adipisicing elit. Laboriosam assumenda ea quo cupiditate facere deleniti fuga officia.</p>
+                                    <p class="mb-5 lead">Ainory Gesase stands as a luminary in the realm of authors and anatomists, 
+                                        an individual whose words transcend the ordinary,
+                                         venturing into the extraordinary. With a keen intellect that navigates both the realms
+                                          of professional excellence and spiritual depth, Ainory Gesase crafts a symphony of words
+                                           that resonates with readers across boundaries.</p>
                                     <div>
-                                        <a href="#" class="btn btn-white btn-outline-white py-3 px-5 rounded-0 mb-lg-0 mb-2 d-block d-sm-inline-block">Shop Now</a>
-                                        <a href="#" class="btn btn-white py-3 px-5 rounded-0 d-block d-sm-inline-block">Club Membership</a>
+                                    <?= Html::a('Author Biography', ['site/author-bio'], ['class' => 'btn btn-white py-3 px-5 rounded-0 d-block d-sm-inline-block']) ?>
+                                        <!-- <a href="#" class="btn btn-white py-3 px-5 rounded-0 d-block d-sm-inline-block">Club Membership</a> -->
                                     </div>
                                 </div>
                             </div>
@@ -54,17 +60,16 @@ $this->title = 'Ainory Digital Book Store';
                 <div class="container">
                     <div class="row align-items-lg-center">
                         <div class="col-md-8 mb-5 mb-lg-0 position-relative">
-                            <img src="/images/about_1.jpg" class="img-fluid" alt="Image">
-                            <div class="experience">
-                                <span class="year">Trusted Merchant</span>
-                                <span class="caption">for 50 years</span>
-                            </div>
+                            <img src="https://th.bing.com/th/id/R.e308431072c4b65858f71a3921024e96?rik=VqNB5EsXmkVX9A&pid=ImgRaw&r=0" class="img-fluid" alt="Image">
+            
                         </div>
                         <div class="col-md-3 ml-auto">
-                            <h3 class="section-sub-title">Merchant Company</h3>
+                            <h3 class="section-sub-title">Digital Book Store</h3>
                             <h2 class="section-title mb-3">About Us</h2>
-                            <p class="mb-4">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Qui fuga ipsa, repellat blanditiis nihil, consectetur. Consequuntur eum inventore, rem maxime, nisi excepturi ipsam libero ratione adipisci alias eius vero vel!</p>
-                            <p><a href="#" class="btn btn-black btn-black--hover rounded-0">Learn More</a></p>
+                            <p class="mb-4">Ainory Peter Gesase is the author of the four books that focuses on spiritual issues key to people salvation. He failed to raise funds to get the books published and and to access self-publishing printing companies.</p>
+                            <!-- <p><a href="#" class="btn btn-black btn-black--hover rounded-0">Learn More</a></p> -->
+                            <?= Html::a('Read More', Url::to(['site/about']) ,['class' => 'btn btn-black btn-black--hover rounded-0']) ?>
+
                         </div>
                     </div>
                 </div>

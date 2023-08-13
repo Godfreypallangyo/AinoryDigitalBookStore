@@ -35,7 +35,7 @@ AppAsset::register($this);
 
             <!-- Sidebar - Brand -->
             <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
-                <div class="sidebar-brand-text mx-3"><?php echo Yii::$app->name?></div>
+                <div class="sidebar-brand-text mx-3"><?php echo Yii::$app->name ?></div>
             </a>
 
             <!-- Divider -->
@@ -61,11 +61,11 @@ AppAsset::register($this);
                     <span>Books</span></a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="tables.html">
+            <a class="nav-link" href="/orderedBook/index">
                     <i class="fas fa-fw fa-table"></i>
-                    <span>Tables</span></a>
+                    <span>Ordered Books</span></a>
             </li>
-
+            
             <!-- Divider -->
             <hr class="sidebar-divider d-none d-md-block">
 
@@ -243,7 +243,7 @@ AppAsset::register($this);
                         <li class="nav-item dropdown no-arrow">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <span class="mr-2 d-none d-lg-inline text-gray-600 small">
-                                    <?php echo  Yii::$app->user->identity->username?>
+                                    <?php echo  Yii::$app->user->identity->username ?>
                                 </span>
                                 <img class="img-profile rounded-circle" src="/img/undraw_profile.svg">
                             </a>
@@ -268,7 +268,6 @@ AppAsset::register($this);
                                 </a>
                             </div>
                         </li>
-
                     </ul>
 
                 </nav>
@@ -280,7 +279,7 @@ AppAsset::register($this);
                         <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
                         <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-success shadow-sm"><i class="fas fa-download fa-sm text-white-50"></i> Generate Report</a>
                     </div>
-                    <?php echo $content?>
+                    <?php echo $content ?>
                 </div>
             </div>
 
@@ -320,12 +319,12 @@ AppAsset::register($this);
                     <button class="btn btn-success" type="button" data-dismiss="modal">Cancel</button>
                     <?php
                     echo Html::beginForm(['/site/logout'], 'post', ['class' => 'd-flex'])
-            . Html::submitButton(
-                'Logout (' . Yii::$app->user->identity->username . ')',
-                ['class' => 'btn btn-success logout text-decoration-none']
-            )
-            . Html::endForm();
-            ?>
+                        . Html::submitButton(
+                            'Logout (' . Yii::$app->user->identity->username . ')',
+                            ['class' => 'btn btn-success logout text-decoration-none']
+                        )
+                        . Html::endForm();
+                    ?>
                 </div>
             </div>
         </div>

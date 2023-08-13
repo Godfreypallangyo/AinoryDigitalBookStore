@@ -42,7 +42,7 @@ AppAsset::register($this);
         ['label' => '<i class="fa fa-pencil" aria-hidden="true"></i> About', 'url' => ['/site/about'],'encode'=>false],
         ['label' => '<i class="fa fa-book" aria-hidden="true"></i> Books', 'url' => ['/site/books'],'encode' => false],
         ['label' => '<i class="fa fa-phone" aria-hidden="true"></i> Contact', 'url' => ['/site/contact'],'encode' => false],
-        ['label' => '<i class="fas fa-shopping-cart"></i> Cart', 'url' => ['/site/cart'], 'encode' => false],
+        ['label' => '<i class="fas fa-shopping-cart"></i> Cart <sup style="color:red;"></sup>', 'url' => ['/site/cart'], 'encode' => false],
     ];
     if (Yii::$app->user->isGuest) {
         $menuItems[] = ['label' => 'Signup', 'url' => ['/site/signup']];

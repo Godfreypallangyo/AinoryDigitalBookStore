@@ -3,6 +3,7 @@
 namespace frontend\controllers;
 
 use common\models\Book;
+use common\models\Clients;
 use frontend\models\ResendVerificationEmailForm;
 use frontend\models\VerifyEmailForm;
 use Yii;
@@ -12,6 +13,7 @@ use yii\web\Controller;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use common\models\LoginForm;
+use common\models\OrderedBook;
 use frontend\models\PasswordResetRequestForm;
 use frontend\models\ResetPasswordForm;
 use frontend\models\SignupForm;
@@ -169,23 +171,120 @@ class SiteController extends Controller
         
         return $this->redirect(Yii::$app->request->referrer ?: ['index']); // Redirect to previous page
     }
+    
     public function actionRemoveItem($book_isbn)
     {
-        if (Yii::$app->session->has('cart')) {
-            $cart = Yii::$app->session->get('cart');
-
+        if (Yii::$app->session->has('cartItems')) {
+            $cartItems = Yii::$app->session->get('cartItems');
+    
             // Find the item in the cart and remove it
-            $updatedCart = array_filter($cart, function ($item) use ($book_isbn) {
+            $updatedCartItems = array_filter($cartItems, function ($item) use ($book_isbn) {
                 return $item['book_isbn'] !== $book_isbn;
             });
-
-            // Save the updated cart to the session
-            Yii::$app->session->set('cart', $updatedCart);
+    
+            // Save the updated cart items to the session
+            Yii::$app->session->set('cartItems', $updatedCartItems);
         }
+    
+        return $this->redirect(['site/cart']); // Redirect back to the cart page
+    }
+     
+    public function actionPayments(){
+        return $this->render('payments');
+    }
+     /**
+     * Logs out the current user.
+     *
+     * @return mixed
+     */
 
-        return $this->redirect(['site/cart']);
+     public function actionCheckout()
+     {
+         $model = new Clients();
+         $cartItems = Yii::$app->session->get('cartItems', []);
+         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            // Save the client information in the session
+            Yii::$app->session->set('clientInfo', $model->id);
+         }
+    
+         if ($this->request->isPost) {
+             if ($model->load($this->request->post()) && $model->validate()) {
+                 $transaction = Yii::$app->db->beginTransaction();
+                 try {
+                     if ($model->save()) {
+                         $cartItems = Yii::$app->session->get('cartItems', []);
+     
+                         foreach ($cartItems as $item) {
+                             $orderedBook = new OrderedBook();
+                             $orderedBook->book_title = $item['book_title'];
+                             $orderedBook->book_isbn = $item['book_isbn'];
+                             $orderedBook->book_price = $item['book_price'];
+                             $orderedBook->order_id = $model->id; // Assuming the 'id' is the client ID
+                             if (!$orderedBook->save()) {
+                                 Yii::error($orderedBook->getErrors(), 'ordered-book-save');
+                             }
+                         }
+     
+                         $transaction->commit();
+                         Yii::$app->session->setFlash('success', 'Data saved successfully.');
+                         Yii::$app->session->remove('cartItems');
+                     } else {
+                         Yii::$app->session->setFlash('error', 'Error saving data.');
+                         Yii::error($model->getErrors(), 'checkout-save');
+                     }
+                 } catch (\Exception $e) {
+                     $transaction->rollBack();
+                     Yii::$app->session->setFlash('error', 'An error occurred while processing your order.');
+                     Yii::error($e->getMessage(), 'checkout-exception');
+                 }
+             } else {
+                 Yii::$app->session->setFlash('error', 'Validation failed.');
+                 Yii::error($model->getErrors(), 'checkout-validation');
+             }
+         }
+         
+         return $this->render('checkout', [
+             'model' => $model,
+             'cartItems'=>$cartItems
+            
+         ]);
+     }
+     public function actionBookDetails($isbn)
+{
+    $book = Book::findOne(['book_isbn' => $isbn]);
+    
+    if ($book === null) {
+        // throw new NotFoundHttpException('Book not found.');
     }
     
+    return $this->render('book-details', [
+        'book' => $book,
+    ]);
+}
+
+     public function actionClients_form()
+{
+    $model = new \common\models\Clients();
+
+    if ($model->load(Yii::$app->request->post())) {
+        if ($model->validate()) {
+            // form inputs are valid, do something here
+            return;
+        }
+    }
+    return $this->render('clients_form', [
+        'model' => $model,
+    ]);
+}
+  /**
+     * Displays about page.
+     *
+     * @return mixed
+     */
+public function actionAuthorBio()
+{
+    return $this->render('authorBio');
+}
 
     /**
      * Displays about page.
