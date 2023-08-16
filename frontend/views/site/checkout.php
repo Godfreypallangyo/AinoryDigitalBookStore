@@ -3,6 +3,8 @@
 use yii\helpers\Html;
 use yii\bootstrap5\ActiveForm;
 use yii\helpers\Url;
+// use \yii\widgets\ActiveFormAsset::register($this);
+// use \yii\web\YiiAsset::register($this);
 
 
 /** @var yii\web\View $this */
@@ -77,7 +79,6 @@ $total_amount_usd = round($total_amount / 2490, 2);
                                             'id' => 'done-button', 
                                             'class' => 'btn btn-primary',
                                             'name' => 'login-button',
-                                            'onclick' => 'toggleFormAndPayment();'
                                         ]) ?>
                                     </div>
                                     <?php ActiveForm::end(); ?>
@@ -116,6 +117,11 @@ $total_amount_usd = round($total_amount / 2490, 2);
                                                         }]
                                                     });
                                                 },
+                                                onApprove:function(data,actions){
+                                                    return actions.order.capture().then(function(details){
+                                                        alert("Transaction complited by "+details.payer.name.given_name);
+                                                    });
+                                                }
                                                 // Finalize the transaction on the server after payer approval
                                             }).render('#paypal-button-container');
                                         </script>
@@ -153,13 +159,14 @@ $total_amount_usd = round($total_amount / 2490, 2);
         clientForm.style.display = 'none';
         paymentContent.style.display = 'block';
     }
-    document.getElementById('done-button').addEventListener('click', function(event) {
+    var checkoutUrl = '<?= Url::to(['site/process-checkout']) ?>';
+
+document.getElementById('done-button').addEventListener('click', function(event) {
     event.preventDefault(); 
 
     var formData = new FormData(document.getElementById('checkout-form'));
 
-    // Perform an AJAX POST request to the new action
-    fetch('site/process-checkout', {
+    fetch(checkoutUrl, {
         method: 'POST',
         body: formData
     })
@@ -174,5 +181,6 @@ $total_amount_usd = round($total_amount / 2490, 2);
         console.error('Error:', error);
     });
 });
+
 
 </script>

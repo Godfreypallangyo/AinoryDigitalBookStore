@@ -245,8 +245,6 @@ class SiteController extends Controller
     }
     public function actionProcessCheckout()
     {
-        echo "Method Called";
-        exit;
         $model = new Clients();
         $cartItems = Yii::$app->session->get('cartItems', []);
         $totalAmount = 0;
@@ -256,15 +254,12 @@ class SiteController extends Controller
         } else {
             $cartItems = Yii::$app->session->get('cartItems', []);
         }
-
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             Yii::$app->session->set('clientInfo', $model->id);
         }
-
         if ($this->request->isPost) {
             if ($model->load($this->request->post()) && $model->validate()) {
                 $transaction = Yii::$app->db->beginTransaction();
-
                 try {
                     if ($model->save()) {
                         $order = new  Orders();
@@ -311,7 +306,7 @@ class SiteController extends Controller
             }
         }
     
-        return $this->asJson(['success' => true]); // Modify this response as needed
+        return $this->asJson(['success' => true]);
     }
     
     public function actionDownload($file)
