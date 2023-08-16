@@ -2,11 +2,15 @@
 
 namespace backend\controllers;
 
+use common\models\Book;
 use common\models\LoginForm;
+use common\models\Orders;
+use common\models\User;
 use Yii;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use yii\web\Controller;
+use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
 /**
@@ -62,7 +66,19 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        return $this->render('index');
+        $userCount = User::find()->andWhere(['status'=>User::STATUS_ACTIVE])->count();
+    
+        $totalEarnings = Orders::find()
+            ->where(['payment_status' => 1]) 
+            ->sum('order_total');
+        
+        $totalBooks = Book::find()->count();
+        
+        return $this->render('index', [
+            'userCount' => $userCount,
+            'totalEarnings' => $totalEarnings,
+            'totalBooks' => $totalBooks,
+        ]);
     }
 
         /**

@@ -5,6 +5,8 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\grid\ActionColumn;
 use yii\grid\GridView;
+use yii\widgets\LinkPager;
+
 
 /** @var yii\web\View $this */
 /** @var backend\models\search\BookSearch $searchModel */
@@ -21,11 +23,19 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= Html::a('Add Book', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
-
+<div class="row">
+    <div class="col-md-8">
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
-        'filterModel' => $searchModel,
+        'pager' => [
+        'class' => LinkPager::class,
+        'hideOnSinglePage' => true, // Hide pagination if there's only one page
+        'options' => ['class' => 'pagination justify-content-center'], // Customize the pagination container's class
+        'prevPageLabel' => '< Previous', // Customize the "Previous" button label
+        'nextPageLabel' => 'Next >', // Customize the "Next" button label
+        // ... other pager options
+    ],
+        // 'filterModel' => $searchModel,
         'columns' => [
             [
                 'attribute'=>'book_isbn',
@@ -56,5 +66,13 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
         ],
     ]); ?>
+    </div>
+    <div class="col-md-4">
+        <h2>Search a Book</h2>
+    <?php  echo $this->render('_search', ['model' => $searchModel]); ?>
+
+    </div>
+</div>
+    
     
 </div>

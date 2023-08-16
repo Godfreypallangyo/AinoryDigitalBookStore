@@ -5,17 +5,19 @@ namespace common\models;
 use Yii;
 
 /**
- * This is the model class for table "orders".
+ * This is the model class for table "{{%orders}}".
  *
- * @property int $order_id
- * @property float $total_price
- * @property int $status
- * @property string $firstName
- * @property string $lastName
- * @property string $email
- * @property string $transaction_id
- * @property int|null $created_at
- * @property int|null $created_by
+ * @property int $id
+ * @property int $client_id
+ * @property string $order_number
+ * @property float $order_total
+ * @property int $payment_status
+ * @property string|null $payment_method
+ * @property string $created_at
+ * @property string $updated_at
+ *
+ * @property Clients $client
+ * @property OrderedBook[] $orderedBooks
  */
 class Orders extends \yii\db\ActiveRecord
 {
@@ -24,7 +26,7 @@ class Orders extends \yii\db\ActiveRecord
      */
     public static function tableName()
     {
-        return 'orders';
+        return '{{%orders}}';
     }
 
     /**
@@ -33,11 +35,13 @@ class Orders extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['total_price', 'status', 'firstName', 'lastName', 'email', 'transaction_id'], 'required'],
-            [['total_price'], 'number'],
-            [['status', 'created_at', 'created_by'], 'integer'],
-            [['firstName', 'lastName'], 'string', 'max' => 45],
-            [['email', 'transaction_id'], 'string', 'max' => 255],
+            [['client_id', 'order_number', 'order_total', 'payment_status'], 'required'],
+            [['client_id', 'payment_status'], 'integer'],
+            [['order_total'], 'number'],
+            [['created_at', 'updated_at'], 'safe'],
+            [['order_number', 'payment_method'], 'string', 'max' => 255],
+            [['order_number'], 'unique'],
+            [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Clients::className(), 'targetAttribute' => ['client_id' => 'id']],
         ];
     }
 
@@ -47,16 +51,35 @@ class Orders extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'order_id' => 'Order ID',
-            'total_price' => 'Total Price',
-            'status' => 'Status',
-            'firstName' => 'First Name',
-            'lastName' => 'Last Name',
-            'email' => 'Email',
-            'transaction_id' => 'Transaction ID',
+            'id' => 'ID',
+            'client_id' => 'Client ID',
+            'order_number' => 'Order Number',
+            'order_total' => 'Order Total',
+            'payment_status' => 'Payment Status',
+            'payment_method' => 'Payment Method',
             'created_at' => 'Created At',
-            'created_by' => 'Created By',
+            'updated_at' => 'Updated At',
         ];
+    }
+
+    /**
+     * Gets query for [[Client]].
+     *
+     * @return \yii\db\ActiveQuery|\common\models\query\ClientsQuery
+     */
+    public function getClient()
+    {
+        return $this->hasOne(Clients::className(), ['id' => 'client_id']);
+    }
+
+    /**
+     * Gets query for [[OrderedBooks]].
+     *
+     * @return \yii\db\ActiveQuery|\common\models\query\OrderedBookQuery
+     */
+    public function getOrderedBooks()
+    {
+        return $this->hasMany(OrderedBook::className(), ['order_id' => 'id']);
     }
 
     /**

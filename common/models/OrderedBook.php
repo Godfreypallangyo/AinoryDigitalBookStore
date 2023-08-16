@@ -10,10 +10,11 @@ use Yii;
  * @property int $id
  * @property string $book_title
  * @property string $book_isbn
- * @property float|null $book_price
+ * @property float $book_price
  * @property int $order_id
  *
  * @property Book $bookIsbn
+ * @property Orders $order
  */
 class OrderedBook extends \yii\db\ActiveRecord
 {
@@ -31,12 +32,13 @@ class OrderedBook extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['book_title', 'book_isbn', 'order_id'], 'required'],
+            [['book_title', 'book_isbn', 'book_price', 'order_id'], 'required'],
             [['book_price'], 'number'],
             [['order_id'], 'integer'],
             [['book_title'], 'string', 'max' => 255],
             [['book_isbn'], 'string', 'max' => 20],
             [['book_isbn'], 'exist', 'skipOnError' => true, 'targetClass' => Book::className(), 'targetAttribute' => ['book_isbn' => 'book_isbn']],
+            [['order_id'], 'exist', 'skipOnError' => true, 'targetClass' => Orders::className(), 'targetAttribute' => ['order_id' => 'id']],
         ];
     }
 
@@ -62,6 +64,16 @@ class OrderedBook extends \yii\db\ActiveRecord
     public function getBookIsbn()
     {
         return $this->hasOne(Book::className(), ['book_isbn' => 'book_isbn']);
+    }
+
+    /**
+     * Gets query for [[Order]].
+     *
+     * @return \yii\db\ActiveQuery|\common\models\query\OrdersQuery
+     */
+    public function getOrder()
+    {
+        return $this->hasOne(Orders::className(), ['id' => 'order_id']);
     }
 
     /**

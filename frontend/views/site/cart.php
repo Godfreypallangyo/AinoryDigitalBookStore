@@ -1,9 +1,9 @@
 <?php
-use yii\helpers\Html;
 
-$this->title = 'My Cart';
+use yii\helpers\Html;
 use yii\helpers\Url;
 
+$this->title = 'My Cart';
 ?>
 
 <div class="site-cart">
@@ -25,13 +25,18 @@ use yii\helpers\Url;
                         <tbody>
                             <?php foreach ($cartItems as $item) : ?>
                                 <tr>
-                                    <td><?= Html::encode($item->book_title); ?></td>
-                                    <td><?=Yii::$app->formatter->currencyCode . $item->book_price; ?></td>
+                                    <td><?= Html::encode(Yii::$app->user->isGuest ? $item['book_title'] : $item->bookIsbn->book_title); ?></td>
+                                    <td><?= Yii::$app->formatter->currencyCode . (Yii::$app->user->isGuest ? $item['book_price'] : $item->bookIsbn->book_price); ?></td>
                                     <td>
-                                        <?= Html::a('Remove', ['site/remove-item', 'book_isbn' => $item->book_isbn], ['class' => 'btn btn-danger']) ?>
+                                        <?php
+                                        $bookIsbn = Yii::$app->user->isGuest ? $item['book_isbn'] : $item->bookIsbn->book_isbn;
+                                        echo Html::a('Remove', ['site/remove-item', 'book_isbn' => $bookIsbn], ['class' => 'btn btn-danger']);
+                                        ?>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
+
+
                         </tbody>
                     </table>
                     <div class="row">
@@ -39,13 +44,24 @@ use yii\helpers\Url;
                             <p>Total Items: <?= count($cartItems); ?></p>
                         </div>
                         <div class="col-md-6">
-                            <p>Total Price: <?=Yii::$app->formatter->currencyCode . array_reduce($cartItems, function ($carry, $item) {
-                                return $carry + $item->book_price;
-                            }, 0); ?></p>
+                            <p>Total Price: <?= Yii::$app->formatter->asCurrency(array_reduce($cartItems, function ($carry, $item) {
+                                                if (Yii::$app->user->isGuest) {
+                                                    return $carry + $item['book_price'];
+                                                } else {
+                                                    return $carry + $item->bookIsbn->book_price;
+                                                }
+                                            }, 0)); ?></p>
                         </div>
+
                     </div>
                     <div class="text-center">
-                    <?= Html::a('Checkout', Url::to(['site/checkout']), ['class' => 'btn btn-primary']) ?>
+                        <?php
+                        if (Yii::$app->user->isGuest) {
+                            echo Html::a('Checkout as Guest', Url::to(['site/checkout']), ['class' => 'btn btn-primary']);
+                        } else {
+                            echo Html::a('Checkout', Url::to(['site/checkout']), ['class' => 'btn btn-primary']);
+                        }
+                        ?>
                     </div>
                 <?php endif; ?>
             </div>

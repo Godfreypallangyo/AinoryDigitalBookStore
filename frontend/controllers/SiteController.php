@@ -3,6 +3,7 @@
 namespace frontend\controllers;
 
 use common\models\Book;
+use common\models\Cart;
 use common\models\Clients;
 use frontend\models\ResendVerificationEmailForm;
 use frontend\models\VerifyEmailForm;
@@ -11,14 +12,18 @@ use yii\base\InvalidArgumentException;
 use yii\web\BadRequestHttpException;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
+use yii\helpers\Url;
 use yii\filters\AccessControl;
 use common\models\LoginForm;
 use common\models\OrderedBook;
+use common\models\Orders;
 use frontend\models\PasswordResetRequestForm;
 use frontend\models\ResetPasswordForm;
 use frontend\models\SignupForm;
 use frontend\models\ContactForm;
 use yii\data\ActiveDataProvider;
+use yii\web\NotFoundHttpException;
+
 
 /**
  * Site controller
@@ -79,10 +84,10 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        $dataProvider=new ActiveDataProvider([
-            'query'=>Book::findBySql("select * from book order by book_isbn limit 3")
+        $dataProvider = new ActiveDataProvider([
+            'query' => Book::findBySql("select * from book order by book_isbn limit 3")
         ]);
-        return $this->render('index',['dataProvider' => $dataProvider]);
+        return $this->render('index', ['dataProvider' => $dataProvider]);
     }
 
     /**
@@ -122,21 +127,29 @@ class SiteController extends Controller
 
     public function actionBooks()
     {
-        $dataProvider=new ActiveDataProvider([
-            'query'=>Book::findBySql("select * from book")
+        $dataProvider = new ActiveDataProvider([
+            'query' => Book::findBySql("select * from book")
         ]);
-        return $this->render('books',['dataProvider'=>$dataProvider]);
+        return $this->render('books', ['dataProvider' => $dataProvider]);
     }
 
     public function actionCart()
     {
-        $cartItems = Yii::$app->session->get('cartItems', []);
-    
+        if (Yii::$app->user->isGuest) {
+            // User is a guest, use session cart data
+            $cartItems = Yii::$app->session->get('cartItems', []);
+        } else {
+            // User is logged in, fetch cart data from the database
+            $user = Yii::$app->user->identity;
+            $cartItems = Cart::find()->where(['user_id' => $user->id])->with('bookIsbn')->all();
+        }
+
         return $this->render('cart', [
             'cartItems' => $cartItems,
         ]);
     }
-    
+
+
     /**
      * Displays contact page.
      *
@@ -162,129 +175,192 @@ class SiteController extends Controller
     public function actionAddToCart($book_isbn)
     {
         $book = Book::findOne(['book_isbn' => $book_isbn]);
-        
+
         if ($book) {
-            $cartItems = Yii::$app->session->get('cartItems', []);
-            $cartItems[] = $book;
-            Yii::$app->session->set('cartItems', $cartItems);
+            if (!Yii::$app->user->isGuest) {
+                $userId = Yii::$app->user->id;
+                $cartItem = new Cart(['user_id' => $userId, 'book_isbn' => $book_isbn]);
+                $cartItem->save();
+            } else {
+                $cartItems = Yii::$app->session->get('cartItems', []);
+                $cartItems[] = $book;
+                Yii::$app->session->set('cartItems', $cartItems);
+            }
         }
-        
-        return $this->redirect(Yii::$app->request->referrer ?: ['index']); // Redirect to previous page
+
+        return $this->redirect(Yii::$app->request->referrer ?: ['index']);
     }
-    
+
     public function actionRemoveItem($book_isbn)
     {
-        if (Yii::$app->session->has('cartItems')) {
-            $cartItems = Yii::$app->session->get('cartItems');
-    
-            // Find the item in the cart and remove it
-            $updatedCartItems = array_filter($cartItems, function ($item) use ($book_isbn) {
-                return $item['book_isbn'] !== $book_isbn;
-            });
-    
-            // Save the updated cart items to the session
-            Yii::$app->session->set('cartItems', $updatedCartItems);
+        if (!Yii::$app->user->isGuest) {
+            $userId = Yii::$app->user->id;
+            $cartItem = Cart::findOne(['user_id' => $userId, 'book_isbn' => $book_isbn]);
+            if ($cartItem) {
+                $cartItem->delete();
+            }
+        } else {
+            if (Yii::$app->session->has('cartItems')) {
+                $cartItems = Yii::$app->session->get('cartItems');
+                $updatedCartItems = array_filter($cartItems, function ($item) use ($book_isbn) {
+                    return $item['book_isbn'] !== $book_isbn;
+                });
+                Yii::$app->session->set('cartItems', $updatedCartItems);
+            }
         }
-    
+
         return $this->redirect(['site/cart']); // Redirect back to the cart page
     }
-     
-    public function actionPayments(){
+
+    public function actionPayments()
+    {
         return $this->render('payments');
     }
-     /**
-     * Logs out the current user.
-     *
-     * @return mixed
-     */
 
-     public function actionCheckout()
-     {
-         $model = new Clients();
-         $cartItems = Yii::$app->session->get('cartItems', []);
-         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
-            // Save the client information in the session
+    public function actionCheckout()
+    {
+        $model = new Clients();
+        $cartItems = Yii::$app->session->get('cartItems', []);
+        $totalAmount = 0;
+        if (!Yii::$app->user->isGuest) {
+            $userId = Yii::$app->user->id;
+            $cartItems = Cart::find()->where(['user_id' => $userId])->all();
+        } else {
+            $cartItems = Yii::$app->session->get('cartItems', []);
+        }
+        if (Yii::$app->user->isGuest) {
+            $totalAmount = array_reduce($cartItems, function ($total, $item) {
+                return $total + $item['book_price'];
+            }, 0);
+        } else {
+            $totalAmount = array_reduce($cartItems, function ($total, $item) {
+                return $total + $item->bookIsbn->book_price;
+            }, 0);
+        }
+        return $this->render('checkout', [
+            'model' => $model,
+            'cartItems' => $cartItems,
+            'totalAmount'=>$totalAmount
+        ]);
+    }
+    public function actionProcessCheckout()
+    {
+        echo "Method Called";
+        exit;
+        $model = new Clients();
+        $cartItems = Yii::$app->session->get('cartItems', []);
+        $totalAmount = 0;
+        if (!Yii::$app->user->isGuest) {
+            $userId = Yii::$app->user->id;
+            $cartItems = Cart::find()->where(['user_id' => $userId])->all();
+        } else {
+            $cartItems = Yii::$app->session->get('cartItems', []);
+        }
+
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             Yii::$app->session->set('clientInfo', $model->id);
-         }
+        }
+
+        if ($this->request->isPost) {
+            if ($model->load($this->request->post()) && $model->validate()) {
+                $transaction = Yii::$app->db->beginTransaction();
+
+                try {
+                    if ($model->save()) {
+                        $order = new  Orders();
+                        $order->client_id = $model->id;
+                        // Linked to the saved client
+                        $order->order_number = 'ORDER' . date('YmdHis') . mt_rand(1000, 9999);
+                        if (Yii::$app->user->isGuest) {
+                            $totalAmount = array_reduce($cartItems, function ($total, $item) {
+                                return $total + $item['book_price'];
+                            }, 0);
+                        } else {
+                            $totalAmount = array_reduce($cartItems, function ($total, $item) {
+                                return $total + $item->bookIsbn->book_price;
+                            }, 0);
+                        }
+                        $order->order_total = $totalAmount;
+
+                        $order->payment_status = 0;
+                        if ($order->save()) {
+                            //This is the  Integrated the PayPal script to be embedded on the view
+                            
+                            $transaction->commit();
+                            Yii::$app->session->setFlash('success', 'Data saved successfully.');
+                            Yii::$app->session->remove('cartItems');
+                        } else {
+                            // var_dump($order->getErrors()); // Debug validation errors
+                            // exit;
+                            Yii::$app->session->setFlash('error', 'Error saving order.');
+                            Yii::error($order->getErrors(), 'order-save');
+                            $transaction->rollBack();
+                        }
+                    } else {
+                        Yii::$app->session->setFlash('error', 'Error saving client information.');
+                        Yii::error($model->getErrors(), 'client-save');
+                    }
+                } catch (\Exception $e) {
+                    $transaction->rollBack();
+                    Yii::$app->session->setFlash('error', 'An error occurred while processing your order.');
+                    Yii::error($e->getMessage(), 'checkout-exception');
+                }
+            } else {
+                Yii::$app->session->setFlash('error', 'Validation failed.');
+                Yii::error($model->getErrors(), 'checkout-validation');
+            }
+        }
     
-         if ($this->request->isPost) {
-             if ($model->load($this->request->post()) && $model->validate()) {
-                 $transaction = Yii::$app->db->beginTransaction();
-                 try {
-                     if ($model->save()) {
-                         $cartItems = Yii::$app->session->get('cartItems', []);
-     
-                         foreach ($cartItems as $item) {
-                             $orderedBook = new OrderedBook();
-                             $orderedBook->book_title = $item['book_title'];
-                             $orderedBook->book_isbn = $item['book_isbn'];
-                             $orderedBook->book_price = $item['book_price'];
-                             $orderedBook->order_id = $model->id; // Assuming the 'id' is the client ID
-                             if (!$orderedBook->save()) {
-                                 Yii::error($orderedBook->getErrors(), 'ordered-book-save');
-                             }
-                         }
-     
-                         $transaction->commit();
-                         Yii::$app->session->setFlash('success', 'Data saved successfully.');
-                         Yii::$app->session->remove('cartItems');
-                     } else {
-                         Yii::$app->session->setFlash('error', 'Error saving data.');
-                         Yii::error($model->getErrors(), 'checkout-save');
-                     }
-                 } catch (\Exception $e) {
-                     $transaction->rollBack();
-                     Yii::$app->session->setFlash('error', 'An error occurred while processing your order.');
-                     Yii::error($e->getMessage(), 'checkout-exception');
-                 }
-             } else {
-                 Yii::$app->session->setFlash('error', 'Validation failed.');
-                 Yii::error($model->getErrors(), 'checkout-validation');
-             }
-         }
-         
-         return $this->render('checkout', [
-             'model' => $model,
-             'cartItems'=>$cartItems
-            
-         ]);
-     }
-     public function actionBookDetails($isbn)
-{
-    $book = Book::findOne(['book_isbn' => $isbn]);
-    
-    if ($book === null) {
-        // throw new NotFoundHttpException('Book not found.');
+        return $this->asJson(['success' => true]); // Modify this response as needed
     }
     
-    return $this->render('book-details', [
-        'book' => $book,
-    ]);
-}
+    public function actionDownload($file)
+    {
+        $filePath = Yii::getAlias('@frontend/web/storage/' . $file);
 
-     public function actionClients_form()
-{
-    $model = new \common\models\Clients();
-
-    if ($model->load(Yii::$app->request->post())) {
-        if ($model->validate()) {
-            // form inputs are valid, do something here
-            return;
+        if (file_exists($filePath)) {
+            Yii::$app->response->sendFile($filePath)->send();
+        } else {
+            throw new NotFoundHttpException('The requested file does not exist.');
         }
     }
-    return $this->render('clients_form', [
-        'model' => $model,
-    ]);
-}
-  /**
+
+    public function actionBookDetails($isbn)
+    {
+        $book = Book::findOne(['book_isbn' => $isbn]);
+
+        if ($book === null) {
+            // throw new NotFoundHttpException('Book not found.');
+        }
+
+        return $this->render('book-details', [
+            'book' => $book,
+        ]);
+    }
+
+    public function actionClients_form()
+    {
+        $model = new \common\models\Clients();
+
+        if ($model->load(Yii::$app->request->post())) {
+            if ($model->validate()) {
+                // form inputs are valid, do something here
+                return;
+            }
+        }
+        return $this->render('clients_form', [
+            'model' => $model,
+        ]);
+    }
+    /**
      * Displays about page.
      *
      * @return mixed
      */
-public function actionAuthorBio()
-{
-    return $this->render('authorBio');
-}
+    public function actionAuthorBio()
+    {
+        return $this->render('authorBio');
+    }
 
     /**
      * Displays about page.

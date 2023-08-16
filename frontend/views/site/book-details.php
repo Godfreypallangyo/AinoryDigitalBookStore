@@ -22,11 +22,13 @@ $this->title = $book->book_title;
                     <p><strong>Author:</strong> <?= $book->book_author ?></p>
                     <p><strong>ISBN:</strong> <?= $book->book_isbn ?></p>
                     <p><strong>Description:</strong> <?= $book->book_descr ?></p>
-                    <p><strong>Price:</strong> <?=Yii::$app->formatter->currencyCode . $book->book_price ?></p>
+                    <p><strong>Price:</strong> <?= Yii::$app->formatter->currencyCode . $book->book_price ?></p>
 
                     <!-- Other book details here -->
                     <?= Html::a('Add to Cart', ['site/add-to-cart', 'book_isbn' => $book->book_isbn], ['class' => 'btn btn-black mr-1 rounded-0']) ?>
-
+                    <?php if ($book->book_file) : ?>
+                        <a href="<?= Yii::$app->urlManager->createUrl(['/site/download', 'file' => $book->book_file]) ?>" class="btn btn-primary">Download Book</a>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>

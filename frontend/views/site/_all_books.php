@@ -22,7 +22,7 @@ use yii\helpers\Url;
         <p class="mb-4"><?php echo StringHelper::truncateWords(strip_tags($model->book_descr),30);?></p>
         <div>
         <?= Html::a('Add to Cart', ['site/add-to-cart', 'book_isbn' => $model->book_isbn], ['class' => 'btn btn-black mr-1 rounded-0']) ?>
-        <?= Html::a( 'View',['site/book-details', 'isbn' => $model->book_isbn],['class'=>"btn btn-black btn-outline-black rounded-0 d-block mb-2 mb-lg-0 d-lg-inline-block"])?>
+        <?= Html::a( 'View details',['site/book-details', 'isbn' => $model->book_isbn],['class'=>"btn btn-black btn-outline-black rounded-0 d-block mb-2 mb-lg-0 d-lg-inline-block"])?>
         </div>
     </div>
 </div>

@@ -3,7 +3,7 @@
 namespace backend\controllers;
 
 use common\models\OrderedBook;
-use backend\models\search\OrderedBookSearch;
+use common\models\OrderedBookSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;

@@ -24,10 +24,6 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'book_author') ?>
 
-    <?= $form->field($model, 'book_image') ?>
-
-    <?= $form->field($model, 'book_file') ?>
-
     <?php // echo $form->field($model, 'book_descr') ?>
 
     <?php // echo $form->field($model, 'book_price') ?>

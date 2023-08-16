@@ -20,17 +20,22 @@ $this->title = 'Ainory Digital Book Store';
                 <div class="container">
                     <div class="row align-items-center justify-content-center">
                         <div class="col-md-12" data-aos="fade-up" data-aos-delay="400">
+                            <?php if (Yii::$app->session->hasFlash('success')) : ?>
+                                <div class="alert alert-success">
+                                    <?= Yii::$app->session->getFlash('success') ?>
+                                </div>
+                            <?php endif; ?>
 
                             <div class="row mb-4">
                                 <div class="col-md-7">
                                     <h1>Ainory Peter Gesase</h1>
-                                    <p class="mb-5 lead">Ainory Gesase stands as a luminary in the realm of authors and anatomists, 
+                                    <p class="mb-5 lead">Ainory Gesase stands as a luminary in the realm of authors and anatomists,
                                         an individual whose words transcend the ordinary,
-                                         venturing into the extraordinary. With a keen intellect that navigates both the realms
-                                          of professional excellence and spiritual depth, Ainory Gesase crafts a symphony of words
-                                           that resonates with readers across boundaries.</p>
+                                        venturing into the extraordinary. With a keen intellect that navigates both the realms
+                                        of professional excellence and spiritual depth, Ainory Gesase crafts a symphony of words
+                                        that resonates with readers across boundaries.</p>
                                     <div>
-                                    <?= Html::a('Author Biography', ['site/author-bio'], ['class' => 'btn btn-white py-3 px-5 rounded-0 d-block d-sm-inline-block']) ?>
+                                        <?= Html::a('Author Biography', ['site/author-bio'], ['class' => 'btn btn-white py-3 px-5 rounded-0 d-block d-sm-inline-block']) ?>
                                         <!-- <a href="#" class="btn btn-white py-3 px-5 rounded-0 d-block d-sm-inline-block">Club Membership</a> -->
                                     </div>
                                 </div>
@@ -60,15 +65,15 @@ $this->title = 'Ainory Digital Book Store';
                 <div class="container">
                     <div class="row align-items-lg-center">
                         <div class="col-md-8 mb-5 mb-lg-0 position-relative">
-                            <img src="https://th.bing.com/th/id/R.e308431072c4b65858f71a3921024e96?rik=VqNB5EsXmkVX9A&pid=ImgRaw&r=0" class="img-fluid" alt="Image">
-            
+                            <img src="/images/Library.jpeg" class="img-fluid" alt="Image">
+
                         </div>
                         <div class="col-md-3 ml-auto">
                             <h3 class="section-sub-title">Digital Book Store</h3>
                             <h2 class="section-title mb-3">About Us</h2>
                             <p class="mb-4">Ainory Peter Gesase is the author of the four books that focuses on spiritual issues key to people salvation. He failed to raise funds to get the books published and and to access self-publishing printing companies.</p>
                             <!-- <p><a href="#" class="btn btn-black btn-black--hover rounded-0">Learn More</a></p> -->
-                            <?= Html::a('Read More', Url::to(['site/about']) ,['class' => 'btn btn-black btn-black--hover rounded-0']) ?>
+                            <?= Html::a('Read More', Url::to(['site/about']), ['class' => 'btn btn-black btn-black--hover rounded-0']) ?>
 
                         </div>
                     </div>

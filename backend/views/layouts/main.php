@@ -61,10 +61,35 @@ AppAsset::register($this);
                     <span>Books</span></a>
             </li>
             <li class="nav-item">
+            <a class="nav-link" href="/orders/index">
+                    <i class="fas fa-fw fa-table"></i>
+                    <span>Orders</span></a>
+            </li>
+            <li class="nav-item">
+            <a class="nav-link" href="/clients/index">
+                    <i class="fas fa-fw fa-table"></i>
+                    <span>Clients</span></a>
+            </li>
+            <li class="nav-item">
+            <a class="nav-link" href="/user/index">
+                    <i class="fas fa-fw fa-table"></i>
+                    <span>Users</span></a>
+            </li>
+            <li class="nav-item">
+            <a class="nav-link" href="/cart/index">
+                    <i class="fas fa-fw fa-table"></i>
+                    <span>Carts</span></a>
+            </li>
+            <li class="nav-item">
             <a class="nav-link" href="/orderedBook/index">
                     <i class="fas fa-fw fa-table"></i>
                     <span>Ordered Books</span></a>
             </li>
+            <!-- <li class="nav-item">
+            <a class="nav-link" href="/orderedBook/index">
+                    <i class="fas fa-fw fa-table"></i>
+                    <span>Ordered Books</span></a>
+            </li> -->
             
             <!-- Divider -->
             <hr class="sidebar-divider d-none d-md-block">
@@ -281,6 +306,7 @@ AppAsset::register($this);
                     </div>
                     <?php echo $content ?>
                 </div>
+                
             </div>
 
             <!-- Footer -->

@@ -9,18 +9,7 @@ use yii\widgets\ActiveForm;
 ?>
 <div class="clients_form">
 
-    <?php $form = ActiveForm::begin(); ?>
-
-        <?= $form->field($model, 'name') ?>
-        <?= $form->field($model, 'address') ?>
-        <?= $form->field($model, 'city') ?>
-        <?= $form->field($model, 'state') ?>
-        <?= $form->field($model, 'country') ?>
-        <?= $form->field($model, 'zipcode') ?>
-    
-        <div class="form-group">
-            <?= Html::submitButton('Submit', ['class' => 'btn btn-primary']) ?>
-        </div>
-    <?php ActiveForm::end(); ?>
+<?php echo '/clients_form'?>
+   
 
 </div><!-- clients_form -->
