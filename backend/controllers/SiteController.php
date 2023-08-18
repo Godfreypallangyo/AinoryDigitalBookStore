@@ -66,6 +66,7 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
+        
         $userCount = User::find()->andWhere(['status'=>User::STATUS_ACTIVE])->count();
     
         $totalEarnings = Orders::find()

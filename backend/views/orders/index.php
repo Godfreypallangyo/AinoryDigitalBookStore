@@ -34,7 +34,17 @@ $this->params['breadcrumbs'][] = $this->title;
             'client_id',
             'order_number',
             'order_total',
-            'payment_status',
+            [
+                'attribute' => 'payment_status',
+                'value' => function ($model) {
+                    return $model->payment_status == 1 ? '<span>paid</span>' : 'notpaid';
+                },
+                'contentOptions' => function ($model) {
+                    return [
+                        'style' => $model->payment_status == 1 ? 'color: green;' : 'color: red;',
+                    ];
+                },
+            ],
             'payment_method',
             'created_at',
             //'updated_at',

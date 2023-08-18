@@ -66,7 +66,7 @@ $total_amount_usd = round($total_amount / 2490, 2);
                             <div class="card-body">
                                 <h4 class="card-title mb-4">Buyer Information</h4>
 
-                                <div class="clients_form" >
+                                <div class="clients_form">
                                     <?php $form = ActiveForm::begin(['id' => 'checkout-form']); ?>
                                     <?= $form->field($model, 'name') ?>
                                     <?= $form->field($model, 'address') ?>
@@ -76,7 +76,7 @@ $total_amount_usd = round($total_amount / 2490, 2);
                                     <?= $form->field($model, 'zipcode') ?>
                                     <div class="form-group">
                                         <?= Html::submitButton('Done', [
-                                            'id' => 'done-button', 
+                                            'id' => 'done-button',
                                             'class' => 'btn btn-primary',
                                             'name' => 'login-button',
                                         ]) ?>
@@ -96,37 +96,12 @@ $total_amount_usd = round($total_amount / 2490, 2);
 								</div> -->
                                     <!-- Credit card form tabs -->
                                     <ul role="tablist" class="nav bg-light nav-pills rounded nav-fill mb-3">
-                                        <li class="nav-item"> <a data-toggle="pill" href="#paypal" class="nav-link active"> <i class="fab fa-paypal mr-2"></i> Paypal </a> </li>
-                                        <li class="nav-item"> <a data-toggle="pill" href="#net-banking" class="nav-link "> <i class="fas fa-mobile-alt mr-2"></i> Moblie Money</a> </li>
+                                        <li class="nav-item"> <a data-toggle="pill" href="#paypal" class="nav-link "> <i class="fab fa-paypal mr-2"></i> Paypal </a> </li>
+                                        <li class="nav-item"> <a data-toggle="pill" href="#net-banking" class="nav-link active"> <i class="fas fa-mobile-alt mr-2"></i> Moblie Money</a> </li>
                                     </ul>
                                 </div> <!-- End -->
                                 <div class="tab-content">
-                                    <!-- Paypal info -->
-                                    <div id="paypal" class="tab-pane active fade pt-3">
-                                        <!-- Set up a container element for the button -->
-                                        <div id="paypal-button-container"></div>
-                                        <script>
-                                            paypal.Buttons({
-                                                // Order is created on the server and the order id is returned
-                                                createOrder: function(data, actions) {
-                                                    return actions.order.create({
-                                                        purchase_units: [{
-                                                            amount: {
-                                                                value: <?php echo $total_amount_usd ?>
-                                                            }
-                                                        }]
-                                                    });
-                                                },
-                                                onApprove:function(data,actions){
-                                                    return actions.order.capture().then(function(details){
-                                                        alert("Transaction complited by "+details.payer.name.given_name);
-                                                    });
-                                                }
-                                                // Finalize the transaction on the server after payer approval
-                                            }).render('#paypal-button-container');
-                                        </script>
-                                    </div> <!-- End -->
-                                    <div id="net-banking" class="tab-pane fade pt-3">
+                                    <div id="net-banking" class="tab-pane active fade pt-3">
                                         <div class="form-group "> <label for="Select Your Bank">
                                                 <h6>Select your Mobile Network</h6>
                                             </label> <select class="form-control" id="ccmonth">
@@ -140,6 +115,57 @@ $total_amount_usd = round($total_amount / 2490, 2);
                                         </div>
                                         <p class="text-muted">Note: After clicking on the button, you will be directed to a secure gateway for payment. After completing the payment process, you will be redirected back to the website to view details of your order. </p>
                                     </div> <!-- End -->
+                                    <!-- Paypal info -->
+                                    <div id="paypal" class="tab-pane  fade pt-3">
+                                        <!-- Set up a container element for the button -->
+                                        <div id="paypal-button-container"></div>
+                                        <script>
+                                            var order_number = '<?php echo Yii::$app->session->get('currentOrderId') . ''; ?>';
+                                            paypal.Buttons({
+                                                createOrder: function(data, actions) {
+                                                    return actions.order.create({
+                                                        purchase_units: [{
+                                                            amount: {
+                                                                value: <?php echo $total_amount_usd ?>
+                                                            },
+                                                            custom_id: '<?php echo Yii::$app->session->get('currentOrderId') . ''; ?>'
+                                                        }]
+                                                    });
+                                                },
+                                                onApprove: function(data, actions) {
+                                                    var orderID = data.orderID;
+                                                    var clientFormData = <?= json_encode(Yii::$app->session->get('clientFormData')) ?>;
+                                                    var client_id=<?php echo Yii::$app->session->get('clientId')?>;
+                                                    console.log(client_id);
+                                                    // console.log(clientFormData);
+                                                    console.log(data);
+                                                    return actions.order.capture().then(function(details) {
+                                                        console.log("hello world");
+                                                        $.ajax({
+                                                            method: 'post',
+                                                            url: '<?= Url::to(['/site/update-payment-status']) ?>',
+                                                            data: {
+                                                                clientID: client_id,
+                                                                clientFormData: clientFormData,
+                                                                payment_method: data.paymentSource,
+                                                                payment_status: 1,
+                                                            },
+                                                            success: function(response) {
+                                                                console.log(response);
+                                                            },
+                                                            error: function(xhr, textStatus, errorThrown) {
+                                                                console.error("Error updating payment status:", errorThrown);
+                                                            }
+                                                        });
+                                                    });
+                                                }
+
+
+                                            }).render('#paypal-button-container');
+                                        </script>
+
+                                    </div> <!-- End -->
+
 
                                 </div>
                             </div>
@@ -161,26 +187,24 @@ $total_amount_usd = round($total_amount / 2490, 2);
     }
     var checkoutUrl = '<?= Url::to(['site/process-checkout']) ?>';
 
-document.getElementById('done-button').addEventListener('click', function(event) {
-    event.preventDefault(); 
+    document.getElementById('done-button').addEventListener('click', function(event) {
+        event.preventDefault();
 
-    var formData = new FormData(document.getElementById('checkout-form'));
+        var formData = new FormData(document.getElementById('checkout-form'));
 
-    fetch(checkoutUrl, {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Hide the form and show the payment content
-            toggleFormAndPayment();
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
+        fetch(checkoutUrl, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Hide the form and show the payment content
+                    toggleFormAndPayment();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
     });
-});
-
-
 </script>

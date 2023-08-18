@@ -44,6 +44,9 @@ class ClientsController extends Controller
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+            'pagination' => [
+                'pageSize' => 5, // Number of items per page
+            ],
         ]);
     }
 

@@ -22,7 +22,7 @@ AppAsset::register($this);
     <title><?= Html::encode($this->title) ?></title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css?family=Muli:300,400,700,900" rel="stylesheet">
-    <link rel="stylesheet" href="fonts/icomoon/style.css">
+    <!-- <link rel="stylesheet" href="fonts/icomoon/style.css"> -->
     <?php $this->head() ?>
 </head>
 <body class="d-flex flex-column h-100">
@@ -44,7 +44,13 @@ AppAsset::register($this);
         ['label' => '<i class="fa fa-phone" aria-hidden="true"></i> Contact', 'url' => ['/site/contact'],'encode' => false],
         ['label' => '<i class="fas fa-shopping-cart"></i> Cart <sup style="color:red;"></sup>', 'url' => ['/site/cart'], 'encode' => false],
     ];
-    if (Yii::$app->user->isGuest) {
+
+    if (!Yii::$app->user->isGuest) {
+        $menuItems[]=['label' => '<i class="fas fa-account"></i> Profile <sup style="color:red;"></sup>', 'url' => ['/site/profile'], 'encode' => false];
+    }
+     else {
+        // Add login and signup links for guests
+        // $menuItems[] = ['label' => 'Login', 'url' => ['/site/login']];
         $menuItems[] = ['label' => 'Signup', 'url' => ['/site/signup']];
     }
 

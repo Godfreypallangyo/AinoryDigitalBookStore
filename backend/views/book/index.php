@@ -29,7 +29,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'pager' => [
         'class' => LinkPager::class,
-        'hideOnSinglePage' => true, // Hide pagination if there's only one page
+        'hideOnSinglePage' => false, // Hide pagination if there's only one page
         'options' => ['class' => 'pagination justify-content-center'], // Customize the pagination container's class
         'prevPageLabel' => '< Previous', // Customize the "Previous" button label
         'nextPageLabel' => 'Next >', // Customize the "Next" button label

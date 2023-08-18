@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use Codeception\Command\Console;
 use common\models\Book;
 use common\models\Cart;
 use common\models\Clients;
@@ -17,12 +18,14 @@ use yii\filters\AccessControl;
 use common\models\LoginForm;
 use common\models\OrderedBook;
 use common\models\Orders;
+use common\models\User;
 use frontend\models\PasswordResetRequestForm;
 use frontend\models\ResetPasswordForm;
 use frontend\models\SignupForm;
 use frontend\models\ContactForm;
 use yii\data\ActiveDataProvider;
 use yii\web\NotFoundHttpException;
+use yii\web\Response;
 
 
 /**
@@ -148,6 +151,31 @@ class SiteController extends Controller
             'cartItems' => $cartItems,
         ]);
     }
+    /**
+     * Displays profile page.
+     *
+     * @return mixed
+     */
+    public function actionProfile()
+    {
+        $user_id = Yii::$app->user->id;
+        $profile = User::findOne($user_id);
+
+        if (!$profile) {
+            // User profile not found, handle the case as needed (optional)
+            Yii::$app->session->setFlash('error', 'User profile not found.');
+            return $this->redirect(['site/index']); // Redirect to some appropriate page
+        }
+
+        if ($profile->load(Yii::$app->request->post()) && $profile->save()) {
+            Yii::$app->session->setFlash('success', 'Profile updated successfully.');
+            return $this->refresh();
+        }
+
+        return $this->render('profile', [
+            'profile' => $profile,
+        ]);
+    }
 
 
     /**
@@ -240,7 +268,7 @@ class SiteController extends Controller
         return $this->render('checkout', [
             'model' => $model,
             'cartItems' => $cartItems,
-            'totalAmount'=>$totalAmount
+            'totalAmount' => $totalAmount
         ]);
     }
     public function actionProcessCheckout()
@@ -248,67 +276,109 @@ class SiteController extends Controller
         $model = new Clients();
         $cartItems = Yii::$app->session->get('cartItems', []);
         $totalAmount = 0;
+
         if (!Yii::$app->user->isGuest) {
             $userId = Yii::$app->user->id;
             $cartItems = Cart::find()->where(['user_id' => $userId])->all();
         } else {
             $cartItems = Yii::$app->session->get('cartItems', []);
         }
-        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
-            Yii::$app->session->set('clientInfo', $model->id);
-        }
-        if ($this->request->isPost) {
-            if ($model->load($this->request->post()) && $model->validate()) {
-                $transaction = Yii::$app->db->beginTransaction();
-                try {
-                    if ($model->save()) {
-                        $order = new  Orders();
-                        $order->client_id = $model->id;
-                        // Linked to the saved client
-                        $order->order_number = 'ORDER' . date('YmdHis') . mt_rand(1000, 9999);
-                        if (Yii::$app->user->isGuest) {
-                            $totalAmount = array_reduce($cartItems, function ($total, $item) {
-                                return $total + $item['book_price'];
-                            }, 0);
-                        } else {
-                            $totalAmount = array_reduce($cartItems, function ($total, $item) {
-                                return $total + $item->bookIsbn->book_price;
-                            }, 0);
-                        }
-                        $order->order_total = $totalAmount;
 
-                        $order->payment_status = 0;
-                        if ($order->save()) {
-                            //This is the  Integrated the PayPal script to be embedded on the view
-                            
-                            $transaction->commit();
-                            Yii::$app->session->setFlash('success', 'Data saved successfully.');
-                            Yii::$app->session->remove('cartItems');
-                        } else {
-                            // var_dump($order->getErrors()); // Debug validation errors
-                            // exit;
-                            Yii::$app->session->setFlash('error', 'Error saving order.');
-                            Yii::error($order->getErrors(), 'order-save');
-                            $transaction->rollBack();
-                        }
+        $postData = Yii::$app->request->post();
+
+        if ($model->load($postData) && $model->validate()) {
+            // $transaction = Yii::$app->db->beginTransaction();
+
+            try {
+                if ($model->save()) {
+                    $order = new Orders();
+                    $order->client_id = $model->id;
+                    $order->order_number = 'ORDER' . date('YmdHis') . mt_rand(1000, 9999);
+
+                    // Store the client form data in session
+                    Yii::$app->session->set('clientId', $model->id);
+                    Yii::$app->session->set('currentOrderId', $order->order_number);
+
+                    // Calculate total amount based on cart items
+                    $totalAmount = array_reduce($cartItems, function ($total, $item) {
+                        return $total + $item->bookIsbn->book_price;
+                    }, 0);
+
+                    $order->order_total = $totalAmount;
+                    $order->payment_status = 0;
+
+                    if ($order->save()) {
+                        // $transaction->commit();
+                        Yii::$app->session->setFlash('success', 'Data saved successfully.');
+                        Yii::$app->session->remove('cartItems');
                     } else {
-                        Yii::$app->session->setFlash('error', 'Error saving client information.');
-                        Yii::error($model->getErrors(), 'client-save');
+                        Yii::$app->session->setFlash('error', 'Error saving order.');
+                        Yii::error($order->getErrors(), 'order-save');
+                        // $transaction->rollBack();
                     }
-                } catch (\Exception $e) {
-                    $transaction->rollBack();
-                    Yii::$app->session->setFlash('error', 'An error occurred while processing your order.');
-                    Yii::error($e->getMessage(), 'checkout-exception');
+                } else {
+                    Yii::$app->session->setFlash('error', 'Error saving client information.');
+                    Yii::error($model->getErrors(), 'client-save');
                 }
-            } else {
-                Yii::$app->session->setFlash('error', 'Validation failed.');
-                Yii::error($model->getErrors(), 'checkout-validation');
+            } catch (\Exception $e) {
+                // $transaction->rollBack();
+                Yii::$app->session->setFlash('error', 'An error occurred while processing your order.');
+                Yii::error($e->getMessage(), 'checkout-exception');
             }
+        } else {
+            Yii::$app->session->setFlash('error', 'Validation failed.');
+            Yii::error($model->getErrors(), 'checkout-validation');
         }
-    
+
         return $this->asJson(['success' => true]);
     }
-    
+
+    public function actionUpdatePaymentStatus()
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        
+        $postData = Yii::$app->request->post();
+        $clientID = isset($postData['clientID']) ? $postData['clientID'] : null;
+        $clientFormData = isset($postData['clientFormData']) ? $postData['clientFormData'] : [];
+        $paymentMethod = isset($postData['payment_method']) ? $postData['payment_method'] : null;
+        $paymentStatus = isset($postData['payment_status']) ? $postData['payment_status'] : null;
+
+        if ($clientID === null || empty($clientFormData) || $paymentMethod === null || $paymentStatus === null) {
+            return ['success' => false, 'message' => 'Invalid request parameters'];
+        }
+
+        // Find the order based on the client ID
+        $order = Orders::findOne(['client_id' => $clientID]);
+
+        if (!$order) {
+            return ['success' => false, 'message' => 'Order not found'];
+        }
+
+        // Update client-related fields based on $clientFormData
+        // Example: Update name, address, etc.
+        $order->client->attributes = $clientFormData;
+
+        $order->payment_status = $paymentStatus;
+        $order->payment_method = $paymentMethod;
+
+        $transaction = Yii::$app->db->beginTransaction();
+        try {
+            if ($order->save() && $order->client->save()) {
+                $transaction->commit();
+                return ['success' => true, 'message' => 'Payment status and client information updated successfully'];
+            } else {
+                Yii::error($order->getErrors(), 'order-save');
+                Yii::error($order->client->getErrors(), 'client-save');
+                $transaction->rollBack();
+                return ['success' => false, 'message' => 'Failed to update payment status and client information'];
+            }
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+            return ['success' => false, 'message' => 'An error occurred while updating payment status and client information'];
+        }
+    }
+
+
     public function actionDownload($file)
     {
         $filePath = Yii::getAlias('@frontend/web/storage/' . $file);
