@@ -37,7 +37,8 @@ class AppAsset extends AssetBundle
         '/js/aos.js',
         '/js/jquery.fancybox.min.js',
         '/js/jquery.sticky.js',
-        'js/main.js'
+        'js/main.js',
+        'https://cdnjs.cloudflare.com/ajax/libs/turn.js/3/turn.min.js',
 
     ];
     public $depends = [

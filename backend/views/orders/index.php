@@ -37,7 +37,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'payment_status',
                 'value' => function ($model) {
-                    return $model->payment_status == 1 ? '<span>paid</span>' : 'notpaid';
+                    return $model->payment_status == 1 ? 'paid' : 'notpaid';
                 },
                 'contentOptions' => function ($model) {
                     return [

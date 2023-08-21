@@ -135,31 +135,46 @@ $total_amount_usd = round($total_amount / 2490, 2);
                                                 onApprove: function(data, actions) {
                                                     var orderID = data.orderID;
                                                     var clientFormData = <?= json_encode(Yii::$app->session->get('clientFormData')) ?>;
-                                                    var client_id=<?php echo Yii::$app->session->get('clientId')?>;
+                                                    var client_id = <?= Yii::$app->session->get('clientId') ?>;
                                                     console.log(client_id);
-                                                    // console.log(clientFormData);
-                                                    console.log(data);
-                                                    return actions.order.capture().then(function(details) {
-                                                        console.log("hello world");
-                                                        $.ajax({
-                                                            method: 'post',
-                                                            url: '<?= Url::to(['/site/update-payment-status']) ?>',
-                                                            data: {
-                                                                clientID: client_id,
-                                                                clientFormData: clientFormData,
-                                                                payment_method: data.paymentSource,
-                                                                payment_status: 1,
-                                                            },
-                                                            success: function(response) {
-                                                                console.log(response);
-                                                            },
-                                                            error: function(xhr, textStatus, errorThrown) {
-                                                                console.error("Error updating payment status:", errorThrown);
+                                                    $.ajax({
+                                                        type: 'POST',
+                                                        url: '<?= Yii::$app->urlManager->createUrl(['/site/update-payment-status']) ?>',
+                                                        data: {
+                                                            clientID: client_id,
+                                                            clientFormData: JSON.stringify(clientFormData),
+                                                            payment_method: data.paymentSource,
+                                                            payment_status: 1
+                                                        },
+                                                        headers: {
+                                                            'X-CSRF-Token': '<?= Yii::$app->request->csrfToken ?>'
+                                                        },
+                                                        success: function(response) {
+                                                            <?php
+                                                            foreach ($cartItems as $cartItem) {
+                                                                $fileUrl = Yii::$app->urlManager->createUrl([
+                                                                    '/site/download',
+                                                                    'file' => $cartItem instanceof \common\models\Cart ? $cartItem->bookIsbn->book_file : $cartItem['book_file'],
+                                                                    'user_id' => Yii::$app->user->isGuest ? null : Yii::$app->user->id
+                                                                ]);
+                                                                echo "console.log('$fileUrl');";
+                                                                echo "window.open('$fileUrl', '_blank');";
                                                             }
-                                                        });
-                                                    });
-                                                }
+                                                            ?>
 
+                                                            if (response.success) {
+                                                                console.log(response.message);
+
+                                                            } else {
+                                                                console.error(response.message);
+                                                            }
+                                                        },
+                                                        error: function() {
+                                                            console.error('Error sending AJAX request');
+                                                        }
+                                                    });
+
+                                                }
 
                                             }).render('#paypal-button-container');
                                         </script>
@@ -168,6 +183,7 @@ $total_amount_usd = round($total_amount / 2490, 2);
 
 
                                 </div>
+
                             </div>
                         </div>
                     </div>

@@ -265,6 +265,10 @@ class SiteController extends Controller
                 return $total + $item->bookIsbn->book_price;
             }, 0);
         }
+        if(empty($cartItems)){
+            return $this->redirect(['/site/cart']);
+        }
+        
         return $this->render('checkout', [
             'model' => $model,
             'cartItems' => $cartItems,
@@ -298,6 +302,7 @@ class SiteController extends Controller
                     // Store the client form data in session
                     Yii::$app->session->set('clientId', $model->id);
                     Yii::$app->session->set('currentOrderId', $order->order_number);
+                    Yii::$app->session->set('orderNumber', $order->order_number);
 
                     // Calculate total amount based on cart items
                     $totalAmount = array_reduce($cartItems, function ($total, $item) {
@@ -310,7 +315,8 @@ class SiteController extends Controller
                     if ($order->save()) {
                         // $transaction->commit();
                         Yii::$app->session->setFlash('success', 'Data saved successfully.');
-                        Yii::$app->session->remove('cartItems');
+
+                        // Yii::$app->session->remove('cartItems');
                     } else {
                         Yii::$app->session->setFlash('error', 'Error saving order.');
                         Yii::error($order->getErrors(), 'order-save');
@@ -336,51 +342,40 @@ class SiteController extends Controller
     public function actionUpdatePaymentStatus()
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
-        
-        $postData = Yii::$app->request->post();
-        $clientID = isset($postData['clientID']) ? $postData['clientID'] : null;
-        $clientFormData = isset($postData['clientFormData']) ? $postData['clientFormData'] : [];
-        $paymentMethod = isset($postData['payment_method']) ? $postData['payment_method'] : null;
-        $paymentStatus = isset($postData['payment_status']) ? $postData['payment_status'] : null;
-
-        if ($clientID === null || empty($clientFormData) || $paymentMethod === null || $paymentStatus === null) {
+    
+        $clientID = Yii::$app->request->post('clientID');
+        $paymentMethod = Yii::$app->request->post('payment_method');
+        $paymentStatus = Yii::$app->request->post('payment_status');
+        $orderNumber=Yii::$app->session->get('orderNumber');
+        if ($clientID === null || $paymentMethod === null || $paymentStatus === null) {
             return ['success' => false, 'message' => 'Invalid request parameters'];
         }
-
-        // Find the order based on the client ID
-        $order = Orders::findOne(['client_id' => $clientID]);
-
+    
+        $order = Orders::findOne(['order_number' => $orderNumber]);
+    
         if (!$order) {
             return ['success' => false, 'message' => 'Order not found'];
         }
-
-        // Update client-related fields based on $clientFormData
-        // Example: Update name, address, etc.
-        $order->client->attributes = $clientFormData;
-
+    
         $order->payment_status = $paymentStatus;
         $order->payment_method = $paymentMethod;
-
-        $transaction = Yii::$app->db->beginTransaction();
+    
         try {
-            if ($order->save() && $order->client->save()) {
-                $transaction->commit();
-                return ['success' => true, 'message' => 'Payment status and client information updated successfully'];
+            if ($order->save()) {
+                exit("Update successful"); // Exit and print a message
             } else {
                 Yii::error($order->getErrors(), 'order-save');
-                Yii::error($order->client->getErrors(), 'client-save');
-                $transaction->rollBack();
-                return ['success' => false, 'message' => 'Failed to update payment status and client information'];
+                exit("Update failed: " . print_r($order->getErrors(), true)); // Exit and print errors
             }
         } catch (\Exception $e) {
-            $transaction->rollBack();
-            return ['success' => false, 'message' => 'An error occurred while updating payment status and client information'];
+            exit("An error occurred: " . $e->getMessage()); // Exit and print exception message
         }
     }
-
+    
 
     public function actionDownload($file)
     {
+        $user_id = Yii::$app->request->get('user_id');
         $filePath = Yii::getAlias('@frontend/web/storage/' . $file);
 
         if (file_exists($filePath)) {
@@ -388,6 +383,14 @@ class SiteController extends Controller
         } else {
             throw new NotFoundHttpException('The requested file does not exist.');
         }
+        if ($user_id !== null) {
+            // Remove cart items associated with the user
+            Cart::deleteAll(['user_id' => $user_id]);
+        } else {
+            // If the user is a guest, remove items from the session
+            Yii::$app->session->remove('cartItems');
+        }
+       
     }
 
     public function actionBookDetails($isbn)

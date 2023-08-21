@@ -1,0 +1,5 @@
+  window.location.href = '<?= Yii::$app->urlManager->createUrl([
+                            '/site/download',
+                            'file' => $cartItem instanceof \common\models\Cart ? $cartItem->bookIsbn->book_file : $cartItem['book_file'],
+                            'user_id' => Yii::$app->user->isGuest ? null : Yii::$app->user->id
+                        ]) ?>';
