@@ -20,6 +20,7 @@ use yii\widgets\ListView;
         <div class="col-md-12"  data-aos="fade-up" data-aos-delay="400">
           <?php echo ListView::widget([
             'dataProvider' => $dataProvider,
+            'summary' => '',
             // 'layout'=>'{summary}\<div class="row">{items}</div>\n{pager}',
             'itemView' => '_all_books',
             'options'=>['class'=>'row my-5'],

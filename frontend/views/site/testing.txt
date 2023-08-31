@@ -1,0 +1,35 @@
+$.ajax({
+                                                        type: 'POST',
+                                                        url: '<?= Yii::$app->urlManager->createUrl(['/site/update-payment-status']) ?>',
+                                                        data: {
+                                                            clientID: client_id,
+                                                            clientFormData: JSON.stringify(clientFormData),
+                                                            payment_method: data.paymentSource,
+                                                            payment_status: 1
+                                                        },
+                                                        headers: {
+                                                            'X-CSRF-Token': '<?= Yii::$app->request->csrfToken ?>'
+                                                        },
+                                                        success: function(response) {
+                                                            alert("Thank you for purchasing our books download will start soon");
+                                                            <?php
+                                                            foreach ($cartItems as $cartItem) {
+                                                                $fileUrl = Yii::$app->urlManager->createUrl([
+                                                                    '/site/download',
+                                                                    'file' => $cartItem instanceof \common\models\Cart ? $cartItem->bookIsbn->book_file : $cartItem['book_file'],
+                                                                    'user_id' => Yii::$app->user->isGuest ? null : Yii::$app->user->id
+                                                                ]);
+                                                                echo "console.log('$fileUrl');";
+                                                                echo "window.open('$fileUrl', '_blank');";
+                                                            }
+                                                            ?>
+                                                            if (response.success) {
+                                                                console.log(response.message);
+                                                            } else {
+                                                                console.error(response.message);
+                                                            }
+                                                        },
+                                                        error: function() {
+                                                            console.error('Error sending AJAX request');
+                                                        }
+                                                    });

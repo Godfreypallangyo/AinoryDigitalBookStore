@@ -31,7 +31,7 @@ class Clients extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['name', 'address', 'city', 'state', 'country'], 'required'],
+            [['name', 'address', 'city', 'state', 'country','zipcode',], 'required'],
             [['name'], 'string', 'max' => 100],
             [['address', 'city', 'state', 'country', 'zipcode'], 'string', 'max' => 255],
         ];

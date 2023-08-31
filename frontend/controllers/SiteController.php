@@ -248,6 +248,7 @@ class SiteController extends Controller
     public function actionCheckout()
     {
         $model = new Clients();
+        
         $cartItems = Yii::$app->session->get('cartItems', []);
         $totalAmount = 0;
         if (!Yii::$app->user->isGuest) {
@@ -290,9 +291,12 @@ class SiteController extends Controller
 
         $postData = Yii::$app->request->post();
 
-        if ($model->load($postData) && $model->validate()) {
-            // $transaction = Yii::$app->db->beginTransaction();
-
+        if ($model->load(Yii::$app->request->post())) {
+            if ($model->validate()) {
+                // Validation successful, process the checkout
+                // Send back a JSON response indicating success
+                Yii::$app->response->format = Response::FORMAT_JSON;
+                return ['success' => true];
             try {
                 if ($model->save()) {
                     $order = new Orders();
@@ -331,12 +335,14 @@ class SiteController extends Controller
                 Yii::$app->session->setFlash('error', 'An error occurred while processing your order.');
                 Yii::error($e->getMessage(), 'checkout-exception');
             }
+        }
+    
         } else {
             Yii::$app->session->setFlash('error', 'Validation failed.');
             Yii::error($model->getErrors(), 'checkout-validation');
         }
 
-        return $this->asJson(['success' => true]);
+        return ['success' => false, 'message' => 'Invalid data'];
     }
 
     public function actionUpdatePaymentStatus()
@@ -390,7 +396,7 @@ class SiteController extends Controller
             // If the user is a guest, remove items from the session
             Yii::$app->session->remove('cartItems');
         }
-       
+        return $this->redirect(['/site/cart']);
     }
 
     public function actionBookDetails($isbn)

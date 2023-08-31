@@ -67,6 +67,7 @@ $total_amount_usd = round($total_amount / 2490, 2);
                                 <h4 class="card-title mb-4">Buyer Information</h4>
 
                                 <div class="clients_form">
+                                <div id="alertDiv" class="alert alert-danger" style="display:none;"></div>
                                     <?php $form = ActiveForm::begin(['id' => 'checkout-form']); ?>
                                     <?= $form->field($model, 'name') ?>
                                     <?= $form->field($model, 'address') ?>
@@ -135,7 +136,7 @@ $total_amount_usd = round($total_amount / 2490, 2);
                                                 onApprove: function(data, actions) {
                                                     var orderID = data.orderID;
                                                     var clientFormData = <?= json_encode(Yii::$app->session->get('clientFormData')) ?>;
-                                                    var client_id = <?= Yii::$app->session->get('clientId') ?>;
+                                                    var client_id = <?= Yii::$app->session->has('clientId') ? Yii::$app->session->get('clientId') : 'null' ?>;
                                                     console.log(client_id);
                                                     $.ajax({
                                                         type: 'POST',
@@ -150,6 +151,7 @@ $total_amount_usd = round($total_amount / 2490, 2);
                                                             'X-CSRF-Token': '<?= Yii::$app->request->csrfToken ?>'
                                                         },
                                                         success: function(response) {
+                                                            alert("Thank you for purchasing our books download will start soon");
                                                             <?php
                                                             foreach ($cartItems as $cartItem) {
                                                                 $fileUrl = Yii::$app->urlManager->createUrl([
@@ -210,14 +212,20 @@ $total_amount_usd = round($total_amount / 2490, 2);
 
         fetch(checkoutUrl, {
                 method: 'POST',
+                headers: {
+                    'X-CSRF-Token': '<?= Yii::$app->request->csrfToken ?>'
+                },
                 body: formData
             })
             .then(response => response.json())
             .then(data => {
-                if (data.success) {
-                    // Hide the form and show the payment content
+                if (data.success ) {
+                    console.log(data);
                     toggleFormAndPayment();
-                }
+            } else {
+                document.getElementById('alertDiv').style.display = 'block';
+                document.getElementById('alertDiv').innerHTML = 'Please fill out all the required fields.';
+            }
             })
             .catch(error => {
                 console.error('Error:', error);

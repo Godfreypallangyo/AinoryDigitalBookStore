@@ -36,6 +36,18 @@ class SiteController extends Controller
                         'allow' => true,
                         'roles' => ['@'],
                     ],
+                    [
+                        'allow' => true,
+                        'actions' => ['index'], // Specify the action where you render the view
+                        'roles' => ['@'], // Allow only authenticated users
+                        'denyCallback' => function ($rule, $action) {
+                            if (Yii::$app->user->isGuest) {
+                                return $this->redirect(['/site/login']);
+                            } else {
+                                return $this->redirect(['/site/logout']);
+                            }
+                        },
+                    ]
                 ],
             ],
             'verbs' => [

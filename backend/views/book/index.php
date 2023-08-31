@@ -27,6 +27,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="col-md-8">
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
+        'summary'=>'',
         'pager' => [
         'class' => LinkPager::class,
         'hideOnSinglePage' => false, // Hide pagination if there's only one page

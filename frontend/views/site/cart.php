@@ -9,10 +9,11 @@ $this->title = 'My Cart';
 <div class="site-cart">
     <div class="container" style="margin-top: 80px;">
         <div class="row">
-            <div class="col-md-12">
+            <div class="col-md-12 text-center justify-content-center">
                 <h1>Shopping Cart</h1>
                 <?php if (empty($cartItems)) : ?>
-                    <p>Your cart is empty.</p>
+                    <span class="fixed-dimensions lazy-load-image-background blur lazy-load-image-loaded" style="color: transparent; display: inline-block; height: 301px; width: 263px;"><img alt="Your shopping cart is empty" src="/images/it_is_empty.gif" width="263" height="301"></span>
+
                 <?php else : ?>
                     <table class="table table-bordered">
                         <thead>

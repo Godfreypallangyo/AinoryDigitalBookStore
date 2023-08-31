@@ -13,10 +13,81 @@ use yii\helpers\Url;
 $this->title = 'Ainory Digital Book Store';
 // $this->params['breadcrumbs'][] = $this->title;
 ?>
+<style>
+    /* Add these CSS styles to your existing stylesheets */
+.image-container {
+    position: relative;
+    overflow: hidden;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.image-container img {
+    width: 100%;
+    height: auto;
+    display: block;
+    transition: transform 0.3s ease-in-out;
+}
+
+.image-container .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.image-container:hover img {
+    transform: scale(1.1);
+}
+
+.image-container:hover .overlay {
+    opacity: 1;
+}
+
+.content-container {
+    padding: 40px;
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.section-title {
+    color: #333;
+    font-size: 28px;
+    margin-bottom: 20px;
+}
+
+.mb-4 {
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+.btn-black {
+    background-color: #000;
+    color: #fff;
+    border-color: #000;
+    transition: background-color 0.3s ease-in-out;
+}
+
+.btn-black:hover {
+    background-color: #333;
+}
+
+.btn-black--hover {
+    background-color: #333;
+    color: #fff;
+    border-color: #333;
+}
+
+</style>
 <div class="site-index">
     <div class="body-content">
         <div class="site-wrap">
-            <div class="site-blocks-cover overlay" style="background-image:url('/images/WelcomePicture.jpg')" data-aos="fade" data-stellar-background-ratio="0.5">
+            <div class="container-fluid site-blocks-cover overlay" style="background-image:url('/images/WelcomePicture.jpg')" data-aos="fade" data-stellar-background-ratio="0.5">
                 <div class="container">
                     <div class="row align-items-center justify-content-center">
                         <div class="col-md-12" data-aos="fade-up" data-aos-delay="400">
@@ -44,7 +115,7 @@ $this->title = 'Ainory Digital Book Store';
                     </div>
                 </div>
             </div>
-            <div class="site-section bg-light">
+            <div class="site-section bg-light mx-5">
                 <div class="container">
                     <div class="row mb-5 justify-content-center">
                         <div class="col-md-6 text-center">
@@ -55,30 +126,33 @@ $this->title = 'Ainory Digital Book Store';
                     </div>
                     <?php echo ListView::widget([
                         'dataProvider' => $dataProvider,
-                        'itemView' => '_book_item'
+                        'itemView' => '_book_item',
+                        'summary' => '',
                     ]) ?>
                 </div>
             </div>
 
 
             <div class="site-section" id="about-section">
-                <div class="container">
-                    <div class="row align-items-lg-center">
-                        <div class="col-md-8 mb-5 mb-lg-0 position-relative">
-                            <img src="/images/Library.jpeg" class="img-fluid" alt="Image">
-
-                        </div>
-                        <div class="col-md-3 ml-auto">
-                            <h3 class="section-sub-title">Digital Book Store</h3>
-                            <h2 class="section-title mb-3">About Us</h2>
-                            <p class="mb-4">Ainory Peter Gesase is the author of the four books that focuses on spiritual issues key to people salvation. He failed to raise funds to get the books published and and to access self-publishing printing companies.</p>
-                            <!-- <p><a href="#" class="btn btn-black btn-black--hover rounded-0">Learn More</a></p> -->
-                            <?= Html::a('Read More', Url::to(['site/about']), ['class' => 'btn btn-black btn-black--hover rounded-0']) ?>
-
-                        </div>
-                    </div>
+    <div class="container">
+        <div class="row align-items-lg-center">
+            <div class="col-md-6 mb-5 mb-lg-0 position-relative">
+                <div class="image-container">
+                    <img src="/images/Library.jpeg" class="img-fluid" alt="Image">
+                    <div class="overlay"></div>
                 </div>
             </div>
+            <div class="col-md-6">
+                <div class="content-container">
+                    <h2 class="section-title mb-3">About Us</h2>
+                    <p class="mb-4">Theologians, pastors and self-proclaimed prophets and apostles have produced a misleading interpretation of Bible prophecies putting Christians into a state of confusion. A good understanding about these prophecies enhances our faith in Jesus and in God’s word and as a result the pathway to salvation becomes more clearer. Among such prophecies include the 70 weeks’ prophecy; 2300 days’ prophecy; Revelation chapter 13 prophecy; 1335 days’ prophecy; 1290 days’ prophecy and a time, times and half a time prophecy. Also, people have given misleading views about Ezekiel’s temple, the abomination of desolation and the two Bible witnesses. Kindly read the four books and see how the Spirit interpret the issues above.</p>
+                    <?= Html::a('Read More', Url::to(['site/about']), ['class' => 'btn btn-black btn-black--hover rounded-0']) ?>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 
         </div>
     </div>

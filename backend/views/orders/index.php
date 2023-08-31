@@ -22,6 +22,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="col-md-8">
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
+        'summary'=>'',
         // 'filterModel' => $searchModel,
         'pager' => [
             'options' => ['class' => 'pagination'], // Add a class to the pager container
