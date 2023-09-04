@@ -3,3 +3,10 @@ deployment:
   tasks:
     - export DEPLOYPATH=/home/ainoryco/digitalbookstore/
     - /bin/cp -R images $DEPLOYPATH
+
+    deployment:
+  tasks:
+    - export DEPLOYPATH=/home/ainoryco/digitalbookstore/
+    - /bin/rm -Rf $DEPLOYPATH
+    - /bin/mkdir $DEPLOYPATH
+    - /bin/cp -R src/. $DEPLOYPATH
