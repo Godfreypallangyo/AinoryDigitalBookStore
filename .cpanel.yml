@@ -1,7 +1,7 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/ainoryco/digitalbookstore/
+    - export DEPLOYPATH=/home/ainoryco/
     - /bin/rm -Rf $DEPLOYPATH
     - /bin/mkdir $DEPLOYPATH
     - /bin/cp -R src/. $DEPLOYPATH
