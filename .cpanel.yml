@@ -1,5 +1,5 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/ainoryco/bookstore
+    - export DEPLOYPATH=/home/ainoryco/public_html
     - /bin/cp -R src/. $DEPLOYPATH
